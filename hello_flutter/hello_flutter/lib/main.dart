@@ -16,7 +16,7 @@ class GHFlutterApp extends StatelessWidget {
 }
 
 class GHFlutterState extends State<GHFlutter> {
-  var _githubTeamMembers = [];
+  var _githubTeamMembers = <Member>[];
   final _biggerFontSize = const TextStyle(fontSize: 18);
 
   @override
@@ -48,7 +48,12 @@ class GHFlutterState extends State<GHFlutter> {
     var dataUrl = "https://api.github.com/orgs/raywenderlich/members";
     http.Response response = await http.get(dataUrl);
     setState(() {
-      _githubTeamMembers = json.decode(response.body);
+      final membersJSON = json.decode(response.body);
+      
+      for (var memberJSON in membersJSON) {
+        final member = Member(memberJSON["login"]);
+        _githubTeamMembers.add(member);
+      }
     });
   }
 
@@ -57,7 +62,7 @@ class GHFlutterState extends State<GHFlutter> {
       padding: EdgeInsets.all(16.0),
       child: ListTile(
         title: new Text(
-          "${_githubTeamMembers[i]["login"]}",
+          "${_githubTeamMembers[i].login}",
           style: _biggerFontSize,
         ),
       ),
@@ -69,5 +74,15 @@ class GHFlutter extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
     return new GHFlutterState();
+  }
+}
+
+class Member {
+  final String login;
+
+  Member(this.login) {
+    if (login == null) {
+      throw ArgumentError("login of Member cannot be null, " "Received: $login");
+    }
   }
 }
